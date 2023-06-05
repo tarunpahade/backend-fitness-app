@@ -7,8 +7,8 @@ const taskRouter = require('./src/router/tasksRouter');
 const studentRouter = require('./src/router/studentFund');
 const parentRouter = require('./src/router/parentFund');
 const loginRouter = require('./src/router/login');
-
-const PORT=5000
+require('dotenv').config()
+const PORT = process.env.PORT || 8080;
 const IP_ADDRESS = '192.168.43.80'
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.json())
@@ -30,6 +30,9 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 })
 
-app.listen(PORT,IP_ADDRESS, () => {
+app.get('/hii', (req, res) => {
+    res.send('Hello World');
+})
+app.listen(PORT, () => {
     console.log('Server is running on port 3000');
 })
