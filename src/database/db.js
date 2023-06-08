@@ -1,6 +1,8 @@
 const express = require("express");
 const { MongoClient, ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const sharp = require('sharp');
+
 
 const uri =
   "mongodb://finstepAdmin:finstep123@ac-gcvl6tk-shard-00-00.xejailu.mongodb.net:27017,ac-gcvl6tk-shard-00-01.xejailu.mongodb.net:27017,ac-gcvl6tk-shard-00-02.xejailu.mongodb.net:27017/finstep?ssl=true&replicaSet=atlas-yixs66-shard-0&authSource=admin&retryWrites=true&w=majority";
@@ -49,15 +51,47 @@ var tasks=mongoose.model('tasks',taskSchema)
 
   //function after completeing the tasks
   //add new feild in exisisting collection
-  async function addNewFieldToCollection(collectionName, fieldName, fieldValue,id) {
+  async function addNewFieldToCollection( collectionName, fieldValue,id) {
     try { 
-      const options = { new: true }; 
-      const result = await tasks.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ imageUri:fieldValue  }} )
-    
-      const result2 = await tasks.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ status: 'completed' }}, 
-      options );
+     
+
+      const db = client.db('finstep');
+      const collection = db.collection(collectionName)
+    const image =fieldValue
+
+
+      if(image==='this is scam img'){
+        const result2 = await collection.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ status: 'completed' }} );
+return result2       
+      }else{
+     
+const maxWidth = 500;
+const maxHeight = 500;
+const quality = 80;
+
+// Create a buffer from the base64 image
+const buffer = Buffer.from(image, 'base64');
+
+if (buffer.length === 0) {
+  console.log('Image buffer is empty');
+} else {
+
+  sharp(buffer)
+  .resize(maxWidth, maxHeight)
+  .jpeg({ quality: quality })
+  .toBuffer()
+  .then( async(compressedImage) => {
+console.log(compressedImage,'img');
+    const result = await collection.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ imageUri:compressedImage  }})
   
-      return result2;
+    const result2 = await collection.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ status: 'completed' }} );
+  console.log(result2);
+     return result2
+  })
+  .catch((error) => console.error(error))
+}
+    }
+
     } catch (error) {
       console.error(error);
       return null;
@@ -68,10 +102,13 @@ var tasks=mongoose.model('tasks',taskSchema)
   async function approveTask(id) {
     try {
       
-      const result= await tasks.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ status: 'approved' }});
-      const result2= await tasks.updateOne( {_id:new ObjectId(id)},  { $unset:{ imageUri: '' }});
+      const db = client.db('finstep');
+      const collection = db.collection('tasks');
+      
+      const result= await collection.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ status: 'approved' }});
+      const result2= await collection.updateOne( {_id:new ObjectId(id)},  { $unset:{ imageUri: '' }});
      
-    
+    return result
     } catch (error) {
       console.log(error);
     }
@@ -79,19 +116,17 @@ var tasks=mongoose.model('tasks',taskSchema)
  //common function used in databases. used to find data with Id 
 async function findDocumentsByFieldValue(collectionName, fieldName, fieldValue) {
     try {
-    
       const db = client.db('finstep');
       const collection = db.collection(collectionName);
       const query = { [fieldName]: fieldValue };
-      console.log(query);
-
+     
       const result = await collection.find(query).toArray(function(err, documents) {
         if (err) {
           console.error(err);
           return;
         }
       })
-      console.log(result);
+     
       return result;
     } catch (error) {
       console.error(error);
@@ -197,4 +232,4 @@ if (password===user.password){
   }
 
 
-  module.exports = { loginUser, getDataFromCollection,findDocumentsByFieldValue,insertDocument,tasks,addNewFieldToCollection, approveTask, findUser};
+  module.exports = { loginUser, getDataFromCollection,findDocumentsByFieldValue,insertDocument,addNewFieldToCollection,tasks, approveTask, findUser};

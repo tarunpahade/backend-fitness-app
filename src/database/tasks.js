@@ -13,7 +13,7 @@ async function createTask(task) {
   };
 
 async function uploadImage(task,id) {
-db.addNewFieldToCollection('finstep','tasks',task,id)
+db.addNewFieldToCollection('tasks',task,id)
 }
 async function taskApproval(id){
 db.approveTask(id)

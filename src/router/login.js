@@ -13,8 +13,7 @@ router.get("/:studentId", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const { name, password } = req.body;
-  console.log(name);
-
+  
   console.log(req.body);
 
   const product = await loginUser(req.body);
