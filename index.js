@@ -2,12 +2,16 @@ const express= require('express');
 const bodyParser=require('body-parser')
 const app = express();
 
+
+//Notification xV790J89vD46plywun_cf4-vpi8ghi7Q04gv-QuQ
 const transactionRouter = require('./src/router/transactionRouter');
 const taskRouter = require('./src/router/tasksRouter');
 const studentRouter = require('./src/router/studentFund');
 const parentRouter = require('./src/router/parentFund');
 const loginRouter = require('./src/router/login');
-const server = require('http').createServer();
+const notificationsRouter = require('./src/router/notification');
+
+const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 require('dotenv').config()
 
@@ -27,22 +31,34 @@ io.on('connection', (socket) => {
   });
   
   socket.on('TaskSentForApproval', (orderData) => {
+    console.log('theb task sent for approval',orderData);
     io.emit('TaskSentForApproval', orderData);
+  });
+  socket.on('ApproveTask', (orderData) => {
+    io.emit('ApproveTask', orderData);
+  });
+  socket.on('RemindTask', (orderData) => {
+    io.emit('RemindTask', orderData);
+  });
+  ;
+  socket.on('New Child', (orderData) => {
+    io.emit('New Child', orderData);
   });
   
 });
 
 
 
-  const PORT=5000
-  const PORT2=6000
+  const PORT=5000 || process.env.PORT
 
-  const IP_ADDRESS = '192.168.169.253'
+
+  const IP_ADDRESS = '192.168.179.253'
 app.use('/transactions', transactionRouter);
 app.use('/tasks', taskRouter);
 app.use('/studentFund', studentRouter);
 app.use('/parentFund', parentRouter);
 app.use('/login', loginRouter);
+app.use('/notification', notificationsRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello World');
@@ -51,8 +67,7 @@ app.get('/', (req, res) => {
 app.get('/hii', (req, res) => {
     res.send('Hello World');
 })
-server.listen(PORT2,IP_ADDRESS); // Replace with your desired server port
-
-app.listen(PORT,IP_ADDRESS, () => {
+//new port
+server.listen(PORT, () => {
     console.log('Server is running on port 3000');
 })

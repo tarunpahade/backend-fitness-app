@@ -1,5 +1,6 @@
+const { json } = require("body-parser");
 const express = require("express");
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient, ObjectId, Int32 } = require("mongodb");
 const mongoose = require("mongoose");
 const sharp = require('sharp');
 
@@ -48,7 +49,30 @@ const uri =
       studentId:String
   });
 var tasks=mongoose.model('tasks',taskSchema)
+const loginSchema = new mongoose.Schema({
+  _id: mongoose.Types.ObjectId,
+  name: String,
+  panNumber: String,
+  balance: Number,
+  password: String,
+  expoPushToken: String,
+  is_parent: Boolean,
+  children: [
+    {
+      expoPushToken: String,
+      name: String,
+      phoneNumber: Number,
+      userId: Number
+    }
+  ],
+  userId: Number,
+  phone_number: Number,
+  date_of_birth: String,
+  current_class: Number,
+  parentId: Number
+});
 
+const Login = mongoose.model('Login', loginSchema);
   //function after completeing the tasks
   //add new feild in exisisting collection
   async function addNewFieldToCollection( collectionName, fieldValue,id) {
@@ -61,9 +85,12 @@ var tasks=mongoose.model('tasks',taskSchema)
 
 
       if(image==='this is scam img'){
+        console.log(id);
         const result2 = await collection.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ status: 'completed' }} );
+        console.log(result2);
 return result2       
       }else{
+        console.log('allal');
      
 const maxWidth = 500;
 const maxHeight = 500;
@@ -99,15 +126,15 @@ console.log(compressedImage,'img');
   }
   
   //add new feild in exisisting collection
-  async function approveTask(id) {
+  async function approveTask(id,studentId) {
     try {
-      
+      console.log(studentId);
       const db = client.db('finstep');
       const collection = db.collection('tasks');
       
       const result= await collection.findOneAndUpdate( {_id:new ObjectId(id)},  { $set:{ status: 'approved' }});
       const result2= await collection.updateOne( {_id:new ObjectId(id)},  { $unset:{ imageUri: '' }});
-     
+     console.log(result);
     return result
     } catch (error) {
       console.log(error);
@@ -144,9 +171,10 @@ async function findDocumentsByFieldValue(collectionName, fieldName, fieldValue) 
       const query = { userId: fieldValue };
       console.log(query);
 console.log(docs);
-      const result = await collection.findOne({ userId: fieldValue })
-    
-const filteredData = docs.filter(obj => obj.userId === 134567);
+    //   const result = await collection.findOne({ userId: fieldValue })
+    // console.log(result);
+    console.log(fieldValue,'valr');
+const filteredData = docs.filter(obj => obj.userId === JSON.parse(fieldValue))
 console.log(filteredData);
       return filteredData;
     } catch (error) {
@@ -231,5 +259,105 @@ if (password===user.password){
     }
   }
 
+async function sendMoneyandRemoveTask(data){
+  try {
+   console.log('start');
+  const db = client.db('finstep');
+  const tasks = db.collection('tasks');
+  const login = db.collection('Login');
+  
+  
+  
+  const { taskId, amount, studentId,parentId,taskName,date } = data;
+console.log(data,'this is dat');
+    
+ const parent=await login.findOne({userId:parentId})
+ const student=await login.findOne({userId:JSON.parse(studentId)})
 
-  module.exports = { loginUser, getDataFromCollection,findDocumentsByFieldValue,insertDocument,addNewFieldToCollection,tasks, approveTask, findUser};
+ 
+
+
+const parentBalance=parent.balance-JSON.parse(amount.substring(2))
+const studentBalance=student.balance+JSON.parse(amount.substring(2))
+
+parent.balance=parentBalance
+student.balance=studentBalance
+
+console.log(parentBalance,studentBalance);
+
+if(parentBalance<0){
+  return 'Zero Balance'
+}else{
+
+  const result = await login.findOneAndUpdate(
+    { userId: parentId },
+    { $set: { balance: parentBalance } },
+    { returnOriginal: false }
+  );
+  
+  const result2 = await login.findOneAndUpdate(
+    { userId: JSON.parse(studentId) },
+    { $set: { balance:studentBalance } },
+    { returnOriginal: false }
+  );
+  const currentDate = new Date();
+  const month = currentDate.toLocaleString('default', { month: 'short' });
+const transaction={
+ "amount": JSON.parse(amount.substring(2)), 
+"credit": true,
+ "month": month,
+  "note": 'tasks', 
+  "studentId":studentId,
+   "transactionDate": date,
+   "userName": "Parent",
+   userImage:'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png'
+  }
+  const transactionCollection = db.collection('transactions');
+  const result4 = await transactionCollection.insertOne(transaction);
+  console.log(result4);
+    const result3 = await tasks.deleteOne({ _id:new ObjectId(taskId) });
+  return result
+}
+ 
+  } catch (error) {
+    console.error(error);
+    return null
+  }
+}
+
+
+async function addChild(document) {
+  try {
+    const db = client.db('finstep');
+    const collection = db.collection('Login');
+    const result = await collection.insertOne(document);
+    console.log(`Inserted ${result.insertedCount} documents into the  collection`);
+const { parentId,name,phone_number,userId }=document
+
+const parent=await collection.findOne({userId:parentId})
+console.log(parent.chlidren);
+const newChild={name,phoneNumber:phone_number,userId}
+
+const result2 = await collection.updateOne(
+  { userId:parentId },
+  { $push: { children: newChild } }
+);
+
+if (result2.modifiedCount === 1) {
+  console.log('Child added successfully');
+} else {
+  console.log('Failed to add child');
+}
+
+
+    console.log(result,result2)
+    return result;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+
+
+  module.exports = { addChild, sendMoneyandRemoveTask,loginUser, getDataFromCollection,findDocumentsByFieldValue,insertDocument,addNewFieldToCollection,tasks, approveTask, findUser};

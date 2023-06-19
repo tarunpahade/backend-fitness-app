@@ -4,7 +4,7 @@ const { getAlltask, uploadImage } = require("../database/tasks");
 const { createTask } = require("../database/tasks");
 
 const { taskApproval }=require('../database/tasks');
-const { addNewFieldToCollection } = require("../database/db");
+const { addNewFieldToCollection, sendMoneyandRemoveTask } = require("../database/db");
 router.get("/:studentId", async (req, res) => {
   const pro = await getAlltask(req.params.studentId);
 
@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
 router.post("/image", async (req, res) => {
   
   const img= req.body.imageUri
-  
+  console.log(req.body);
   const task=  await   uploadImage(img,req.body.id) 
 //console.log(task);
 
@@ -35,11 +35,10 @@ console.log(task);
 //tasks/approved
 
 router.post("/approved", async (req, res) => {
-  console.log(req.body)
-  const newTask = JSON.stringify(req.body.id);
-  console.log(newTask);
-  //console.log(img);
-const result=taskApproval(JSON.parse(newTask))
+  
+  console.log(req.body,req.body.id,req.body.studentId);
+ 
+const result=taskApproval(req.body.id,req.body.studentId)
 if(!result){
   console.log('THis is error');
   res.status(201).send({ status: "401", data: 'there is a err' });
@@ -50,4 +49,22 @@ if(!result){
 
 });
 
+
+router.post("/sendMoney", async (req, res) => {
+  console.log(req.body);
+const result=await sendMoneyandRemoveTask(req.body)
+
+if(!result){
+  console.log('THis is error');
+  res.status(201).send({ status: "401", data: 'there is a err' });
+
+}else if(result==='Zero Balance'){
+  res.status(201).send({ status: "Zero Balance", data: 'there is a err' });
+} else{
+  res.status(201).send({ status: "Ok", data: result });
+
+}
+
+
+});
 module.exports = router;
