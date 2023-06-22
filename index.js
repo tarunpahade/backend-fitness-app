@@ -46,6 +46,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('RequestedForMoney', (orderData) => {
+   console.log(orderData);
     io.emit('RequestedForMoney', orderData);
   });
 
@@ -57,7 +58,7 @@ io.on('connection', (socket) => {
   const PORT=5000 || process.env.PORT
 
 
-  const IP_ADDRESS = '192.168.1.105'
+  const IP_ADDRESS = '192.168.179.253'
 app.use('/transactions', transactionRouter);
 app.use('/tasks', taskRouter);
 app.use('/studentFund', studentRouter);
@@ -75,6 +76,6 @@ app.get('/hii', (req, res) => {
 //new port
 
 
-server.listen(PORT,IP_ADDRESS, () => {
+server.listen(PORT, () => {
     console.log('Server is running on port 3000');
 })

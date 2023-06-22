@@ -371,7 +371,7 @@ async function parentToChild(data){
    const currentDate2 = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
  
    const transaction={
-  "amount": JSON.stringify(amount), 
+  "amount": JSON.parse(amount), 
  "credit": true,
   "month": month,
    "note": 'sent to child', 
@@ -421,7 +421,7 @@ async function sendMoneyAndAddTransaction(data){
    const month = currentDate.toLocaleString('default', { month: 'short' });
    const currentDate2 = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
  const transaction={
-  "amount": amount, 
+  "amount": JSON.parse(amount), 
  "credit": false,
   "month": month,
    "note": note, 
