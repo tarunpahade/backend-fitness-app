@@ -302,13 +302,15 @@ if(parentBalance<0){
   );
   const currentDate = new Date();
   const month = currentDate.toLocaleString('default', { month: 'short' });
-const transaction={
+  const currentDate2 = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+
+  const transaction={
  "amount": JSON.parse(amount.substring(2)), 
 "credit": true,
  "month": month,
   "note": 'tasks', 
   "studentId":studentId,
-   "transactionDate": date,
+   "transactionDate": currentDate2,
    "userName": "Parent",
    userImage:'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png'
   }
@@ -325,6 +327,120 @@ const transaction={
   }
 }
 
+
+//child makes the transaction
+async function parentToChild(data){
+  try {
+    console.log('start');
+   const db = client.db('finstep');
+   const login = db.collection('Login');
+   
+   
+   
+   const {  amount, studentId,parentId } = data;
+ console.log(data,'this is dat');
+     
+  const parent=await login.findOne({userId:parentId})
+  const student=await login.findOne({userId:studentId})
+
+ const parentBalance=parent.balance-JSON.parse(amount)
+ const studentBalance=student.balance+JSON.parse(amount)
+ 
+ parent.balance=parentBalance
+ student.balance=studentBalance
+ 
+ console.log(parentBalance,studentBalance);
+ 
+ if(parentBalance<0){
+   return 'Zero Balance'
+ }else{
+ 
+   const result = await login.findOneAndUpdate(
+     { userId: parentId },
+     { $set: { balance: parentBalance } },
+     { returnOriginal: false }
+   );
+   
+   const result2 = await login.findOneAndUpdate(
+     { userId: JSON.parse(studentId) },
+     { $set: { balance:studentBalance } },
+     { returnOriginal: false }
+   );
+   const currentDate = new Date();
+   const month = currentDate.toLocaleString('default', { month: 'short' });
+   const currentDate2 = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+ 
+   const transaction={
+  "amount": JSON.stringify(amount), 
+ "credit": true,
+  "month": month,
+   "note": 'sent to child', 
+   "studentId":JSON.stringify(studentId),
+    "transactionDate": currentDate2,
+    "userName": "Parent",
+    userImage:'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png'
+   }
+   const transactionCollection = db.collection('transactions');
+   const result4 = await transactionCollection.insertOne(transaction);
+   console.log(result4,result2,result);
+     
+   return result
+ }
+  
+   } catch (error) {
+     console.error(error);
+     return null
+   }}
+
+
+
+
+
+//child makes the transaction
+async function sendMoneyAndAddTransaction(data){
+  try {
+    console.log('starting to send money');
+   const db = client.db('finstep');
+   const login = db.collection('Login');  
+   
+   const { phone,studentId,amount,note,to } = data;
+ console.log(data,'this is guru');
+     
+  const student=await login.findOne({userId:studentId})
+ console.log(student,'this is student');
+ const studentBalance=student.balance-JSON.parse(amount)
+ 
+ 
+   
+   const result = await login.findOneAndUpdate(
+     { userId: JSON.parse(studentId) },
+     { $set: { balance:studentBalance } },
+     { returnOriginal: false }
+   );
+   const currentDate = new Date();
+   const month = currentDate.toLocaleString('default', { month: 'short' });
+   const currentDate2 = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+ const transaction={
+  "amount": amount, 
+ "credit": false,
+  "month": month,
+   "note": note, 
+   "studentId":JSON.stringify(studentId),
+    "transactionDate": currentDate2,
+    "userName": to,
+    "userImage":'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png',
+    "phoneNumber":phone
+   }
+   const transactionCollection = db.collection('transactions');
+   const result4 = await transactionCollection.insertOne(transaction);
+   console.log(result4);
+     return result
+ 
+   } catch (error) {
+     console.error(error);
+     return null
+   }
+}
 
 async function addChild(document) {
   try {
@@ -360,4 +476,4 @@ if (result2.modifiedCount === 1) {
 
 
 
-  module.exports = { addChild, sendMoneyandRemoveTask,loginUser, getDataFromCollection,findDocumentsByFieldValue,insertDocument,addNewFieldToCollection,tasks, approveTask, findUser};
+  module.exports = {sendMoneyAndAddTransaction, addChild, sendMoneyandRemoveTask,loginUser, getDataFromCollection,findDocumentsByFieldValue,insertDocument,addNewFieldToCollection,tasks, approveTask, findUser, parentToChild};

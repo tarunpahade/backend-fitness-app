@@ -40,10 +40,15 @@ io.on('connection', (socket) => {
   socket.on('RemindTask', (orderData) => {
     io.emit('RemindTask', orderData);
   });
-  ;
+  
   socket.on('New Child', (orderData) => {
     io.emit('New Child', orderData);
   });
+
+  socket.on('RequestedForMoney', (orderData) => {
+    io.emit('RequestedForMoney', orderData);
+  });
+
   
 });
 
@@ -52,7 +57,7 @@ io.on('connection', (socket) => {
   const PORT=5000 || process.env.PORT
 
 
-  const IP_ADDRESS = '192.168.179.253'
+  const IP_ADDRESS = '192.168.1.105'
 app.use('/transactions', transactionRouter);
 app.use('/tasks', taskRouter);
 app.use('/studentFund', studentRouter);
@@ -68,6 +73,8 @@ app.get('/hii', (req, res) => {
     res.send('Hello World');
 })
 //new port
-server.listen(PORT, () => {
+
+
+server.listen(PORT,IP_ADDRESS, () => {
     console.log('Server is running on port 3000');
 })

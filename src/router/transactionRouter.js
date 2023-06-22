@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getAllTransaction } = require('../database/transaction');
+const { sendMoneyAndAddTransaction, parentToChild } = require('../database/db');
 
 
 router.get('/:studentId',async (req, res) => {
@@ -151,7 +152,33 @@ const output=[{IncSum:IncSum,ExpSum:ExpSum,uniquemonth:uniquemonth,uniquemonth2:
 console.log(output);
       res.send({status:'Ok', data:output})
             })
+//child sends money to other user
 
- 
-       
+            router.post("/studentPays", async (req, res) => {
+              console.log(req.body);
+            const result=await sendMoneyAndAddTransaction(req.body)
+            
+            if(!result){
+              console.log('THis is error');
+              res.status(201).send({ status: "401", data: 'there is a err' });
+            
+            }else{
+              res.status(201).send({ status: "Ok", data: result });
+            
+            }
+            });
+            
+            router.post("/parentToChild", async (req, res) => {
+              console.log('hello bro');
+            const result=await parentToChild(req.body)
+            
+            if(!result){
+              console.log('THis is error');
+              res.status(201).send({ status: "401", data: 'there is a err' });
+            
+            }else{
+              res.status(201).send({ status: "Ok", data: result });
+            }
+            });
+           
 module.exports=router

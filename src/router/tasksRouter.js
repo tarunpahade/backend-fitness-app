@@ -4,7 +4,7 @@ const { getAlltask, uploadImage } = require("../database/tasks");
 const { createTask } = require("../database/tasks");
 
 const { taskApproval }=require('../database/tasks');
-const { addNewFieldToCollection, sendMoneyandRemoveTask } = require("../database/db");
+const { addNewFieldToCollection, sendMoneyandRemoveTask,sendMoneyAndAddTransaction } = require("../database/db");
 router.get("/:studentId", async (req, res) => {
   const pro = await getAlltask(req.params.studentId);
 
@@ -49,7 +49,7 @@ if(!result){
 
 });
 
-
+//the parent sends money to the choosen student amount is the task amount
 router.post("/sendMoney", async (req, res) => {
   console.log(req.body);
 const result=await sendMoneyandRemoveTask(req.body)
@@ -64,7 +64,6 @@ if(!result){
   res.status(201).send({ status: "Ok", data: result });
 
 }
-
-
 });
+
 module.exports = router;
