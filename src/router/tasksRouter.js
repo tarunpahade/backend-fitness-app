@@ -4,10 +4,15 @@ const { getAlltask, uploadImage } = require("../database/tasks");
 const { createTask } = require("../database/tasks");
 
 const { taskApproval }=require('../database/tasks');
-const { addNewFieldToCollection, sendMoneyandRemoveTask,sendMoneyAndAddTransaction } = require("../database/db");
+const { addNewFieldToCollection, sendMoneyandRemoveTask,sendMoneyAndAddTransaction, insertDocument, redoTask } = require("../database/db");
 router.get("/:studentId", async (req, res) => {
   const pro = await getAlltask(req.params.studentId);
 
+  res.send({ status: "Ok", data: pro });
+});
+router.post("/redoTask", async (req, res) => {
+  const pro = await redoTask(req.body.id);
+console.log(pro,'yhis si');
   res.send({ status: "Ok", data: pro });
 });
 
@@ -22,10 +27,22 @@ router.post("/", async (req, res) => {
 
 router.post("/image", async (req, res) => {
   
-  const img= req.body.imageUri
-  console.log(req.body);
-  const task=  await   uploadImage(img,req.body.id) 
-//console.log(task);
+  console.log(req.body,'this is body');
+const {parentId,amount,childName,name,imageUri,_id} =req.body
+  const notifications = {
+    userId: JSON.parse(parentId),
+    amount: amount,
+    childName: childName,
+    name: name,
+    type: "task sent for approval",
+  };
+  const inserrtNotification = await insertDocument(
+    "Notifications",
+    notifications
+  );
+  console.log(inserrtNotification, "this is inserrtNotification");
+
+  const task=  await   uploadImage(imageUri,_id) 
 
 console.log(task);
 
