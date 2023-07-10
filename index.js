@@ -74,6 +74,6 @@ app.get('/hii', (req, res) => {
 //new port
 
 
-server.listen(PORT,IP_ADDRESS, () => {
+server.listen(PORT, () => {
     console.log('Server is running on port 3000');
 })
