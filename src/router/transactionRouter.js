@@ -234,6 +234,8 @@ router.post("/parentToChild", async (req, res) => {
     res.status(201).send({ status: "401", data: "there is a err" });
   } else if(result === 'Zero Balance'){
     res.status(201).send({ status: "Zero Balance", data: result });
+  }else{
+    res.status(201).send({ status: "Ok", data: result });
   }
 });
 
