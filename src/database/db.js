@@ -361,7 +361,7 @@ async function parentToChild(data) {
         amount: JSON.parse(amount),
         credit: true,
         month: month,
-        note: "Parent",
+        note: data.note,
         studentId: JSON.stringify(studentId),
         transactionDate: currentDate2,
         userName: "Parent",
