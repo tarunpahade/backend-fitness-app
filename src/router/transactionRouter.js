@@ -225,8 +225,9 @@ router.post("/studentPays", async (req, res) => {
   }
 });
 
-router.post("/parentToChild", async (req, res) => {
+router.post("/parentToChild", async (req, res) => { 
   console.log("hello bro");
+  console.log(req.body);
   const result = await parentToChild(req.body);
 
   if (!result) {
@@ -235,6 +236,7 @@ router.post("/parentToChild", async (req, res) => {
   } else if(result === 'Zero Balance'){
     res.status(201).send({ status: "Zero Balance", data: result });
   }else{
+    
     res.status(201).send({ status: "Ok", data: result });
   }
 });

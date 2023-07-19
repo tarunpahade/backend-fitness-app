@@ -1,3 +1,4 @@
+const { json } = require("body-parser");
 const { MongoClient, ObjectId, Int32 } = require("mongodb");
 const sharp = require("sharp");
 
@@ -330,13 +331,13 @@ async function parentToChild(data) {
     const parentBalance = parent.balance - JSON.parse(amount);
     const studentBalance = student.balance + JSON.parse(amount);
 
-    parent.balance = parentBalance;
+    parent.balance = parentBalance; 
     student.balance = studentBalance;
 
-    console.log(parentBalance, studentBalance);
+  
 
     if (parentBalance < 0) {
-      return "Zero Balance";
+      return "Zero Balance"; 
     } else {
       const result = await login.findOneAndUpdate(
         { userId: parentId },
@@ -375,7 +376,8 @@ async function parentToChild(data) {
         userId: JSON.parse(studentId),
         amount: amount,
         childName: student.name,
-        name: parent,
+        note:data.note,
+        name: 'Parent',
         type: "Money Sent By Parent",
       };
       const inserrtNotification = await insertDocument(
@@ -390,7 +392,7 @@ async function parentToChild(data) {
   } catch (error) {
     console.error(error);
     return null;
-  }
+  } 
 }
 
 //when child makes the transaction

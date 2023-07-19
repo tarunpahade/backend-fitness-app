@@ -49,4 +49,23 @@ router.post("/addChild", async (req, res) => {
   }
 });
 
+
+
+
+router.post("/new-account", async (req, res) => {
+  
+  const child=req.body
+ 
+   const product = await insertDocument('Login',child)
+  if (!product) {
+    res.status(404).send({ status: "Failed", data: "User not found" });
+    return;
+  }
+  try {
+    res.send({ status: "Ok", data: product });
+  } catch (error) {
+    res.status(401).send({ status: "Failed", data: error.message });
+  }
+});
+
 module.exports = router;

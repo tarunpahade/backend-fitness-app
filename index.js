@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
   const PORT=5000 || process.env.PORT
 
 
-  const IP_ADDRESS = '192.168.1.107'
+  const IP_ADDRESS = '192.168.106.253'
 app.use('/transactions', transactionRouter);
 app.use('/tasks', taskRouter);
 app.use('/studentFund', studentRouter);
