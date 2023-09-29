@@ -5,7 +5,7 @@ const { findUser, insertDocument, addChild } = require("../database/db");
 const { loginUser } = require("../database/db");
 const sid = "ACbf2608b126a238d429463d915859023d";
 const auth_token = "4335230463b820cc6d7b6fcbf50237fd";
-var twilio = require("twilio")(sid, auth_token);
+var client = require("twilio")(sid, auth_token);
 
 router.get("/:studentId", async (req, res) => {
   const user = req.params.studentId;
@@ -52,25 +52,24 @@ router.post("/addChild", async (req, res) => {
   }
 });
 
-
 router.post("/sendOtp", async (req, res) => {
-  console.log("hiii");
-  const {otp,to} = req.body;
-  
-    const message =await twilio.messages
-      .create({
-        from: "+12565738101",
-        to: to,
-        body: `this is testing otp is ${otp}`,
-      })
-      .then(function (res) {
-        console.log("message has sent!");
-      })
-      .catch(function (err) {
-        console.log(err.message);
-      });
-    res.send({ message });
-  
+  const { otp, to } = req.body;
+
+  try {
+    const message = await twilio.messages.create({
+      from: "+12565738101",
+      to: to,
+      body: `This is a test OTP: ${otp}`,
+    });
+
+    console.log("Message has been sent!");
+    res.send({ status: "Ok", data:message });
+
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send({ error: error.message });
+  }
 });
 
 

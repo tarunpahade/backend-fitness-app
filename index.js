@@ -52,7 +52,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 5000 || process.env.PORT;
+const PORT = 3000 || process.env.PORT;
 
 const IP_ADDRESS = "192.168.106.253";
 app.use("/transactions", transactionRouter);
