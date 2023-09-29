@@ -56,7 +56,7 @@ router.post("/sendOtp", async (req, res) => {
   const { otp, to } = req.body;
 
   try {
-    const message = await twilio.messages.create({
+    const message = await client.messages.create({
       from: "+12565738101",
       to: to,
       body: `This is a test OTP: ${otp}`,
