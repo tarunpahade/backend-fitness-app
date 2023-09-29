@@ -1,10 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
-const sid = "ACbf2608b126a238d429463d915859023d";
-const auth_token = "4335230463b820cc6d7b6fcbf50237fd";
-var twilio = require("twilio")(sid, auth_token);
+const cors = require('cors');
 
+// Enable All CORS Requests
+;
 //Notification xV790J89vD46plywun_cf4-vpi8ghi7Q04gv-QuQ
 const transactionRouter = require("./src/router/transactionRouter");
 const taskRouter = require("./src/router/tasksRouter");
@@ -25,7 +25,7 @@ app.use(
     limit: "50mb",
   })
 );
-
+app.use(cors())
 io.on("connection", (socket) => {
   socket.on("newTask", (orderData) => {
     io.emit("newTask", orderData);
@@ -66,28 +66,6 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
-app.post("/sendOtp", async (req, res) => {
-  console.log("hiii");
-  const {otp} = req.body;
-  try {
-    const message = twilio.messages
-      .create({
-        from: "+12565738101",
-        to: "+918010669013",
-        body: `this is testing otp is ${otp}`,
-      })
-      .then(function (res) {
-        console.log("message has sent!");
-      })
-      .catch(function (err) {
-        console.log(err.message);
-      });
-    res.send({ message });
-  } catch (error) {
-    console.log(error.message);
-    res.send({ error: error.message });
-  }
-});
 
 app.get("/hii", (req, res) => {
   res.send("Hello World");
