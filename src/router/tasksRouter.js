@@ -1,10 +1,11 @@
+
 const express = require("express");
 const router = express.Router();
 const { getAlltask, uploadImage } = require("../database/tasks");
 const { createTask } = require("../database/tasks");
 
 const { taskApproval }=require('../database/tasks');
-const { addNewFieldToCollection, sendMoneyandRemoveTask,sendMoneyAndAddTransaction, insertDocument, redoTask } = require("../database/db");
+const {  sendMoneyandRemoveTask, insertDocument, redoTask } = require("../database/db");
 router.get("/:studentId", async (req, res) => {
   const pro = await getAlltask(req.params.studentId);
 
@@ -29,6 +30,8 @@ router.post("/image", async (req, res) => {
   
   console.log(req.body,'this is body');
 const {parentId,amount,childName,name,imageUri,_id} =req.body
+
+console.log(req.imageUri);
   const notifications = {
     userId: JSON.parse(parentId),
     amount: amount,

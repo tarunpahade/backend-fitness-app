@@ -1,7 +1,7 @@
 const { json } = require("body-parser");
 const { MongoClient, ObjectId, Int32 } = require("mongodb");
 const sharp = require("sharp");
-
+const uploadBase64Image= require('../service/imageToUrl')
 const uri =
   "mongodb://finstepAdmin:finstep123@ac-gcvl6tk-shard-00-00.xejailu.mongodb.net:27017,ac-gcvl6tk-shard-00-01.xejailu.mongodb.net:27017,ac-gcvl6tk-shard-00-02.xejailu.mongodb.net:27017/finstep?ssl=true&replicaSet=atlas-yixs66-shard-0&authSource=admin&retryWrites=true&w=majority";
 
@@ -31,16 +31,11 @@ async function addNewFieldToCollection(collectionName, fieldValue, id) {
     const db = client.db("finstep");
     const collection = db.collection(collectionName);
     const image = fieldValue;
+if(fieldValue !== null && fieldValue !== undefined) {
+
 
     console.log(id, fieldValue, "yhis is id and feild value");
-    if (typeof image === "string") {
-      const result2 = await collection.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: { status: "completed" } }
-      );
-
-      return result2;
-    } else {
+    
       const maxWidth = 500;
       const maxHeight = 500;
       const quality = 80;
@@ -51,25 +46,45 @@ async function addNewFieldToCollection(collectionName, fieldValue, id) {
       if (buffer.length === 0) {
         console.log("Image buffer is empty");
       } else {
-        sharp(buffer)
+     const img= await  sharp(buffer)
           .resize(maxWidth, maxHeight)
           .jpeg({ quality: quality })
           .toBuffer()
           .then(async (compressedImage) => {
-            const result = await collection.findOneAndUpdate(
-              { _id: new ObjectId(id) },
-              { $set: { imageUri: compressedImage } }
-            );
+return compressedImage
+            })
 
-            const result2 = await collection.findOneAndUpdate(
-              { _id: new ObjectId(id) },
-              { $set: { status: "completed" } }
-            );
+            
+      const awsS3link = await uploadBase64Image(img);
+      const imageUrl= awsS3link;
+      console.log(awsS3link, "this is link for api");
 
-            return result2;
-          })
-          .catch((error) => console.error(error));
-      }
+
+
+
+      const result = await collection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { imageUri: awsS3link } }
+      );
+      console.log(result,'this is the result');
+
+   
+      const result2 = await collection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: {status:'completed' } }
+      );
+      return result2;
+    
+      
+     }
+    } else {
+
+      const result2 = await collection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: {status:'completed' } }
+      );
+      return result2;
+    
     }
   } catch (error) {
     console.error(error);
