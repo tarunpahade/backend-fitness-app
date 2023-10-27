@@ -33,8 +33,8 @@ app.get("/", async(req, res) => {
 const data=await  getDataFromCollection('back')
 res.send({status:200,data:data})
 });
-const IP_ADDRESS ='192.168.209.253'
+const IP_ADDRESS ='192.168.183.253'
 
-app.listen(PORT,  () => {
+app.listen(PORT, IP_ADDRESS, () => {
   console.log(`Server is running on ${IP_ADDRESS}:${PORT}`);
 });
