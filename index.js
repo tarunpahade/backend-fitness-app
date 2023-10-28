@@ -5,7 +5,7 @@ const cors = require('cors');
 const {getDataFromCollection}=require('./src/database/db')
 
 const workoutRouter = require("./src/router/workoutRouter");
-const authRouter= require("./src/router/Login");
+const authRouter= require("./src/router/login");
 
 require("dotenv").config();
 
