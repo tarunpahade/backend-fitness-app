@@ -35,6 +35,6 @@ res.send({status:200,data:data})
 });
 const IP_ADDRESS ='192.168.183.253'
 
-app.listen(PORT, IP_ADDRESS, () => {
-  console.log(`Server is running on ${IP_ADDRESS}:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on :${PORT}`);
 });
